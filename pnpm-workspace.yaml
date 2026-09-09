@@ -18,11 +18,64 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - brace-expansion@5.0.9
   - nanoid@3.3.18
+  # Optional wasm runtimes omit publish time on the packument. pnpm 11 then errors
+  # unless the package name is excluded. Overrides pin the lockfile versions.
+  - '@emnapi/core'
+  - '@emnapi/runtime'
+  # Vitest 5.0.0 (2026-09-03) is still inside the 7-day quarantine. Name excludes
+  # let the install proceed. Overrides pin the 5.0.0 line. @vitest/runner has no 5.0.0.
+  - vitest
+  - '@vitest/coverage-v8'
+  - '@vitest/expect'
+  - '@vitest/mocker'
+  - '@vitest/pretty-format'
+  - '@vitest/snapshot'
+  - '@vitest/spy'
+  - '@vitest/utils'
+  - browserslist
+  - baseline-browser-mapping
+  # Packuments omit publish time. Name excludes let the install proceed.
+  - eslint
+  - '@eslint/plugin-kit'
+  - oxc-parser
+  - '@oxc-project/types'
+  - rolldown
+  - '@typescript-eslint/types'
+  - '@typescript-eslint/typescript-estree'
+  - '@typescript-eslint/visitor-keys'
+  - '@typescript-eslint/utils'
+  - '@typescript-eslint/scope-manager'
+  - '@typescript-eslint/type-utils'
+  - '@typescript-eslint/project-service'
+  # Vitest 5 dependencies omit publish time.
+  - tinyexec
+  - tinybench
+  - mdn-data
 
 overrides:
+  '@emnapi/core': 1.10.0
+  '@emnapi/runtime': 1.10.0
   # GHSA-r292-9mhp-454m fixed in 7.5.21+
   tar: 7.5.22
   # GHSA-rgw5-rvv9-x895 fixed in 5.0.9+
   brace-expansion: 5.0.9
   # GHSA-2v37-7h3g-55p8 fixed in the 3.x line in 3.3.18+
   nanoid: 3.3.18
+  # GHSA-82fw-gwwq-j7x9 fixed in 4.1.11; 5.0.0 includes that fix.
+  vitest: 5.0.0
+  '@vitest/coverage-v8': 5.0.0
+  '@vitest/expect': 5.0.0
+  '@vitest/mocker': 5.0.0
+  '@vitest/pretty-format': 5.0.0
+  '@vitest/snapshot': 5.0.0
+  '@vitest/spy': 5.0.0
+  '@vitest/utils': 5.0.0
+  # GHSA-p498-v437-472g fixed in 0.16.8
+  '@humanfs/node': 0.16.8
+  # GHSA-73wf-gq98-2v4g / GHSA-c83g-rgw3-j3cx
+  browserslist: 4.28.7
+  # GHSA-w5vr-8v7q-w6rv fixed in 2.11.0
+  baseline-browser-mapping: 2.11.0
+  # vite@8.2.2 wants rolldown ~1.2.4, which currently resolves to 1.2.7 (inside the
+  # 7-day quarantine). 1.2.6 is the newest release that satisfies the age gate.
+  rolldown: 1.2.6

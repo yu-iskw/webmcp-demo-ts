@@ -1,0 +1,98 @@
+:root {
+  color: #1c1917;
+  font-family: 'Iowan Old Style', Palatino, 'Palatino Linotype', serif;
+  background: #f6f1e7;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  max-width: 40rem;
+  margin: 2rem auto;
+  padding: 0 1.25rem 3rem;
+}
+
+h1,
+h2 {
+  font-weight: 600;
+}
+
+label {
+  display: block;
+  margin-top: 0.75rem;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+li {
+  margin: 0.4rem 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #e7e5e4;
+  background: #fff;
+}
+
+li[data-state='open'] {
+  border-left: 4px solid #0f766e;
+}
+
+li[data-state='booked'] {
+  border-left: 4px solid #b45309;
+  background: #fff7ed;
+}
+
+li[data-state='filed'] {
+  border-left: 4px solid #1d4ed8;
+  background: #eff6ff;
+}
+
+li[data-state='empty'] {
+  color: #78716c;
+  font-style: italic;
+}
+
+#status {
+  min-height: 1.5rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+ol li {
+  margin: 0;
+}
+
+li[data-state='done'] {
+  border-left: 4px solid #0f766e;
+  background: #f0fdfa;
+}
+
+li[data-state='current'] {
+  border-left: 4px solid #1d4ed8;
+  background: #eff6ff;
+}
+
+li[data-state='waiting'] {
+  color: #78716c;
+}
+
+form[data-tool-active='true'] {
+  outline: dashed 1px #1d4ed8;
+  outline-offset: 6px;
+}

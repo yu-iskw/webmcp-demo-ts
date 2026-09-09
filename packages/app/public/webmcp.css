@@ -1,0 +1,10 @@
+/* Served as a static file so Lightning CSS does not drop Chrome's draft tool pseudos. */
+form:tool-form-active {
+  outline: dashed 1px #1d4ed8;
+  outline-offset: 6px;
+}
+
+button:tool-submit-active {
+  outline: dashed 1px #be123c;
+  outline-offset: 2px;
+}
