@@ -36,7 +36,7 @@ describe('front desk', () => {
     const listed = listSlots(startVisit(seed).state);
     expect(listed.message).toBe(formatOpenSlots(seed));
     expect(listed.message).toContain(SLOT_1000);
-    expect(formatAppointmentLine(seed.slots[0])).toBe('10:00 open');
+    expect(formatAppointmentLine(seed.slots[0], false)).toBe('10:00 open');
     expect(formatVisitLine(listed.state)).toBe('visit-1 slots listed');
   });
 
@@ -50,7 +50,7 @@ describe('front desk', () => {
     const beforeList = bookSlot(started.state, SLOT_1000);
     expect(beforeList.message).toContain('Call list_slots first');
     expect(beforeList.state).toBe(started.state);
-    expect(formatAppointmentLine(beforeList.state.slots[0])).toBe('10:00 open');
+    expect(formatAppointmentLine(beforeList.state.slots[0], false)).toBe('10:00 open');
   });
 
   it('books a listed slot and rejects a second booking without changing state', () => {
@@ -58,7 +58,7 @@ describe('front desk', () => {
     const booked = bookSlot(ready, SLOT_1000);
 
     expect(booked.message).toBe('Booked 10:00 (slot-1000) for visit-1. Next, call file_request.');
-    expect(formatAppointmentLine(booked.state.slots[0])).toBe('10:00 booked');
+    expect(formatAppointmentLine(booked.state.slots[0], true)).toBe('10:00 booked');
     expect(formatVisitLine(booked.state)).toBe('visit-1 booked slot-1000');
 
     const duplicate = bookSlot(booked.state, SLOT_1000);

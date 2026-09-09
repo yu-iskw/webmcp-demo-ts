@@ -1,15 +1,14 @@
 export const ERROR_PREFIX = 'ERROR: ';
 
 export const SLOT_1000 = 'slot-1000';
-export const SLOT_1100 = 'slot-1100';
-export const SLOT_1400 = 'slot-1400';
+const SLOT_1100 = 'slot-1100';
+const SLOT_1400 = 'slot-1400';
 
 export const REQUEST_TOPICS = ['access', 'billing', 'other'] as const;
 
 export type RequestTopic = (typeof REQUEST_TOPICS)[number];
 
 export type Slot = {
-  booked: boolean;
   id: string;
   label: string;
 };
@@ -30,13 +29,12 @@ export type Visit = {
 };
 
 export type DeskState = {
-  nextRequestNumber: number;
   requests: SupportRequest[];
   slots: Slot[];
   visit?: Visit;
 };
 
-export type FileRequestInput = {
+type FileRequestInput = {
   details: string;
   name: string;
   topic: string;
@@ -46,12 +44,11 @@ const TOPIC_SET: ReadonlySet<string> = new Set(REQUEST_TOPICS);
 
 export function createSeedDesk(): DeskState {
   return {
-    nextRequestNumber: 1,
     requests: [],
     slots: [
-      { booked: false, id: SLOT_1000, label: '10:00' },
-      { booked: false, id: SLOT_1100, label: '11:00' },
-      { booked: false, id: SLOT_1400, label: '14:00' },
+      { id: SLOT_1000, label: '10:00' },
+      { id: SLOT_1100, label: '11:00' },
+      { id: SLOT_1400, label: '14:00' },
     ],
   };
 }
@@ -92,8 +89,12 @@ export function listSlots(state: DeskState): { message: string; state: DeskState
   };
 }
 
-export function listOpenSlots(state: DeskState): Slot[] {
-  return state.slots.filter((slot) => !slot.booked);
+export function isSlotBooked(state: DeskState, slotId: string): boolean {
+  return state.visit?.slotId === slotId;
+}
+
+function listOpenSlots(state: DeskState): Slot[] {
+  return state.slots.filter((slot) => !isSlotBooked(state, slot.id));
 }
 
 export function formatOpenSlots(state: DeskState): string {
@@ -101,8 +102,8 @@ export function formatOpenSlots(state: DeskState): string {
   return JSON.stringify(open);
 }
 
-export function formatAppointmentLine(slot: Slot): string {
-  const status = slot.booked ? 'booked' : 'open';
+export function formatAppointmentLine(slot: Slot, booked: boolean): string {
+  const status = booked ? 'booked' : 'open';
   return `${slot.label} ${status}`;
 }
 
@@ -131,24 +132,16 @@ export function bookSlot(state: DeskState, slotId: string): { message: string; s
       state,
     };
   }
-  if (slot.booked) {
-    return {
-      message: `${ERROR_PREFIX}Slot ${slot.id} is already booked. Choose another open slot.`,
-      state,
-    };
-  }
-
   return {
     message: `Booked ${slot.label} (${slot.id}) for ${state.visit.id}. Next, call file_request.`,
     state: {
       ...state,
-      slots: state.slots.map((item) => (item.id === slot.id ? { ...item, booked: true } : item)),
       visit: { ...state.visit, slotId: slot.id },
     },
   };
 }
 
-export function isRequestTopic(value: string): value is RequestTopic {
+function isRequestTopic(value: string): value is RequestTopic {
   return TOPIC_SET.has(value);
 }
 
@@ -188,7 +181,7 @@ export function fileRequest(
 
   const request: SupportRequest = {
     details,
-    id: `req-${String(state.nextRequestNumber)}`,
+    id: `req-${String(state.requests.length + 1)}`,
     name,
     topic,
   };
@@ -197,7 +190,6 @@ export function fileRequest(
     message: `Filed ${request.id} for ${request.name} (${request.topic}). Next, call confirm_visit.`,
     state: {
       ...state,
-      nextRequestNumber: state.nextRequestNumber + 1,
       requests: [...state.requests, request],
       visit: { ...state.visit, requestId: request.id },
     },

@@ -1,21 +1,13 @@
 import { chromium, type Page } from 'playwright';
 
-const BASE_URL = process.env.WEBMCP_BASE_URL ?? 'http://127.0.0.1:8080';
+import { baseUrl, executeTool } from './webmcp-browser.ts';
+
 const SHOT_DIR = process.env.WEBMCP_DEMO_DIR ?? '/tmp/webmcp-demo';
 const NO_OUTPUT = 'no output';
 const REQUESTER = 'Ada Lovelace';
 const SLOT_1000 = 'slot-1000';
 const STARTED = 'visit-1 started';
 const VISIT_SUMMARY = '#visit-summary';
-
-type ToolSummary = {
-  name: string;
-};
-
-type PageModelContext = {
-  executeTool: (tool: ToolSummary, input: string) => Promise<string | null>;
-  getTools: () => Promise<ToolSummary[]>;
-};
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -56,28 +48,6 @@ async function shot(page: Page, name: string): Promise<void> {
   await page.screenshot({ path: `${SHOT_DIR}/${name}.png`, fullPage: true });
 }
 
-async function executeTool(
-  page: Page,
-  name: string,
-  args: Record<string, string>,
-): Promise<string | null> {
-  return page.evaluate(
-    async ({ argsJson, name: toolName }) => {
-      const context = (document as Document & { modelContext?: PageModelContext }).modelContext;
-      if (!context) {
-        throw new Error('document.modelContext is missing');
-      }
-      const tools = await context.getTools();
-      const tool = tools.find((item) => item.name === toolName);
-      if (!tool) {
-        throw new Error(`tool ${toolName} is not registered`);
-      }
-      return context.executeTool(tool, argsJson);
-    },
-    { argsJson: JSON.stringify(args), name },
-  );
-}
-
 async function main(): Promise<void> {
   const browser = await chromium.launchPersistentContext('', {
     args: [
@@ -93,7 +63,7 @@ async function main(): Promise<void> {
     viewport: { height: 1040, width: 1040 },
   });
   const page = await browser.newPage();
-  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+  await page.goto(baseUrl(), { waitUntil: 'domcontentloaded' });
   await page.locator('body[data-desk-ready="true"]').waitFor();
   await showStep(
     page,

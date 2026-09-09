@@ -15,12 +15,12 @@ type ToolLifecycleEvent = Event & {
   toolName?: string;
 };
 
-function requireElement<T extends HTMLElement>(id: string): T {
+function requireElement<T extends HTMLElement>(id: string, ctor: new () => T): T {
   const element = document.querySelector(`#${id}`);
-  if (!(element instanceof HTMLElement)) {
+  if (!(element instanceof ctor)) {
     throw new Error(`Missing #${id}`);
   }
-  return element as T;
+  return element;
 }
 
 function readField(form: HTMLFormElement, name: string): string {
@@ -50,33 +50,26 @@ function bindRequestForm(
   readState: () => DeskState,
   writeState: (state: DeskState, message: string) => void,
 ): void {
-  let activeAgentTool: string | undefined;
-
   window.addEventListener('toolactivated', (event) => {
-    const toolName = (event as ToolLifecycleEvent).toolName;
-    activeAgentTool = toolName;
-    if (toolName === 'file_request') {
+    if ((event as ToolLifecycleEvent).toolName === 'file_request') {
       form.dataset.toolActive = 'true';
     }
   });
   window.addEventListener('toolcancel', () => {
-    activeAgentTool = undefined;
     delete form.dataset.toolActive;
   });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     const agentEvent = event as AgentSubmitEvent;
-    const invokedByAgent = agentEvent.agentInvoked === true || activeAgentTool === 'file_request';
     const result = fileRequest(readState(), {
       details: readField(form, 'details'),
       name: readField(form, 'name'),
       topic: readField(form, 'topic'),
     });
     writeState(result.state, result.message);
-    if (invokedByAgent) {
+    if (agentEvent.agentInvoked === true) {
       respond(agentEvent, result.message);
-      activeAgentTool = undefined;
       delete form.dataset.toolActive;
       if (!result.message.startsWith(ERROR_PREFIX)) {
         clearTextFields(form);
@@ -90,12 +83,12 @@ function bindRequestForm(
 }
 
 async function start(): Promise<void> {
-  const appointments = requireElement<HTMLUListElement>('appointments');
-  const requests = requireElement<HTMLUListElement>('requests');
-  const visit = requireElement<HTMLElement>('visit');
-  const steps = requireElement<HTMLOListElement>('visit-steps');
-  const status = requireElement<HTMLElement>('status');
-  const form = requireElement<HTMLFormElement>('file-request');
+  const appointments = requireElement('appointments', HTMLUListElement);
+  const requests = requireElement('requests', HTMLUListElement);
+  const visit = requireElement('visit', HTMLElement);
+  const steps = requireElement('visit-steps', HTMLOListElement);
+  const status = requireElement('status', HTMLElement);
+  const form = requireElement('file-request', HTMLFormElement);
 
   let state = createSeedDesk();
 

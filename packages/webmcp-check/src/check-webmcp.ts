@@ -1,6 +1,7 @@
-import { chromium, type Page } from 'playwright';
+import { type Page } from 'playwright';
 
-const DEFAULT_BASE_URL = 'http://127.0.0.1:8080';
+import { baseUrl, executeTool, launchWebmcpChrome, waitForDesk } from './webmcp-browser.ts';
+
 const APPOINTMENTS = 'Appointments';
 const REQUESTS = 'Requests';
 const REQUESTER = 'Ada Lovelace';
@@ -34,10 +35,6 @@ type PageModelContext = {
   executeTool: (tool: ToolSummary, input: string) => Promise<string | null>;
   getTools: () => Promise<ToolSummary[]>;
 };
-
-function baseUrl(): string {
-  return process.env.WEBMCP_BASE_URL ?? DEFAULT_BASE_URL;
-}
 
 function reportFailure(
   tools: string[],
@@ -90,55 +87,43 @@ async function waitForTools(page: Page, names: string[]): Promise<ToolSummary[]>
   return latest;
 }
 
-async function executeTool(
-  page: Page,
-  name: string,
-  args: Record<string, string>,
-): Promise<string | null> {
-  return page.evaluate(
-    async ({ argsJson, name: toolName }) => {
-      const context = (document as Document & { modelContext?: PageModelContext }).modelContext;
-      if (!context) {
-        throw new Error('document.modelContext.executeTool is missing');
-      }
-      const tools = await context.getTools();
-      const tool = tools.find((item) => item.name === toolName);
-      if (!tool) {
-        throw new Error(`tool ${toolName} is not registered`);
-      }
-      return context.executeTool(tool, argsJson);
-    },
-    { argsJson: JSON.stringify(args), name },
-  );
-}
-
 async function appointmentText(page: Page): Promise<string> {
   return page.getByRole('list', { name: APPOINTMENTS }).innerText();
 }
 
+function asError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
 async function fileSupportRequest(page: Page): Promise<string | null> {
-  let failure: Error | undefined;
+  let failure: unknown;
   const pending = executeTool(page, FILE_REQUEST, {
     details: REQUEST_DETAILS,
     name: REQUESTER,
     topic: 'access',
-  }).catch((error: unknown) => {
-    failure = error instanceof Error ? error : new Error(String(error));
-    return null;
-  });
+  }).then(
+    (value) => value,
+    (error: unknown) => {
+      failure = error;
+      return null;
+    },
+  );
 
-  const deadline = Date.now() + 8000;
-  while (Date.now() < deadline) {
-    if ((await page.getByRole('list', { name: REQUESTS }).innerText()).includes(REQUESTER)) {
-      return pending;
-    }
-    if (failure) {
-      throw failure;
-    }
-    await page.waitForTimeout(100);
+  try {
+    await page
+      .getByRole('list', { name: REQUESTS })
+      .getByText(REQUESTER)
+      .waitFor({ timeout: 8000 });
+  } catch (error) {
+    await pending;
+    throw asError(failure ?? error);
   }
 
-  return pending;
+  const value = await pending;
+  if (failure !== undefined) {
+    throw asError(failure);
+  }
+  return value;
 }
 
 function firstOpenSlotId(output: string): string | undefined {
@@ -152,22 +137,6 @@ function firstOpenSlotId(output: string): string | undefined {
   }
   const id = first.id;
   return typeof id === 'string' ? id : undefined;
-}
-
-async function openApp(page: Page): Promise<void> {
-  const deadline = Date.now() + 30000;
-  let lastError = 'web app did not become reachable';
-  while (Date.now() < deadline) {
-    try {
-      await page.goto(baseUrl(), { waitUntil: 'domcontentloaded' });
-      await page.locator('body[data-desk-ready="true"]').waitFor({ timeout: 5000 });
-      return;
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : String(error);
-      await page.waitForTimeout(500);
-    }
-  }
-  throw new Error(lastError);
 }
 
 async function checkBooking(
@@ -272,7 +241,7 @@ async function checkSequence(page: Page, names: string[]): Promise<CheckReport |
 }
 
 async function checkDesk(page: Page): Promise<CheckReport> {
-  await openApp(page);
+  await waitForDesk(page);
 
   const available = await hasModelContext(page);
   if (!available) {
@@ -332,15 +301,7 @@ async function checkDesk(page: Page): Promise<CheckReport> {
 }
 
 async function main(): Promise<void> {
-  const browser = await chromium.launchPersistentContext('', {
-    args: [
-      '--enable-features=WebMCP,WebMCPTesting',
-      '--no-default-browser-check',
-      '--no-first-run',
-    ],
-    channel: 'chrome',
-    headless: false,
-  });
+  const browser = await launchWebmcpChrome();
   const page = await browser.newPage();
   try {
     const report = await checkDesk(page);

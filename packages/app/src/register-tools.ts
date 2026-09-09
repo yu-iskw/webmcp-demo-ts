@@ -1,14 +1,14 @@
 import { bookSlot, confirmVisit, ERROR_PREFIX, listSlots, startVisit } from './desk';
 
 import type { DeskState } from './desk';
-import type { ModelContext } from './webmcp';
+import type { ModelContext, ToolExecuteOptions } from './webmcp';
 
 const START_VISIT = 'start_visit';
 const LIST_SLOTS = 'list_slots';
 const BOOK_SLOT = 'book_slot';
 const CONFIRM_VISIT = 'confirm_visit';
 
-const openSlotSchema = {
+const emptyInputSchema = {
   additionalProperties: false,
   properties: {},
   type: 'object',
@@ -26,8 +26,22 @@ const bookSlotSchema = {
   type: 'object',
 } as const;
 
-function isCancelled(options: { signal?: AbortSignal } | undefined): boolean {
+function isCancelled(options: ToolExecuteOptions | undefined): boolean {
   return options?.signal?.aborted === true;
+}
+
+function runTransition(
+  readState: () => DeskState,
+  writeState: (state: DeskState, message: string) => void,
+  options: ToolExecuteOptions | undefined,
+  transition: (state: DeskState) => { message: string; state: DeskState },
+): string {
+  if (isCancelled(options)) {
+    return `${ERROR_PREFIX}Tool execution was cancelled.`;
+  }
+  const result = transition(readState());
+  writeState(result.state, result.message);
+  return result.message;
 }
 
 function readSlotId(args: Record<string, unknown>): string | undefined {
@@ -43,30 +57,16 @@ export async function registerDeskTools(
   await modelContext.registerTool({
     annotations: { consequentialHint: false, readOnlyHint: false },
     description: 'Start a desk visit. Required before list_slots. Returns visit-1.',
-    execute: (_args, options) => {
-      if (isCancelled(options)) {
-        return `${ERROR_PREFIX}Tool execution was cancelled.`;
-      }
-      const result = startVisit(readState());
-      writeState(result.state, result.message);
-      return result.message;
-    },
-    inputSchema: openSlotSchema,
+    execute: (_args, options) => runTransition(readState, writeState, options, startVisit),
+    inputSchema: emptyInputSchema,
     name: START_VISIT,
   });
 
   await modelContext.registerTool({
     annotations: { readOnlyHint: false },
     description: 'List open appointment slots for the started visit. Call start_visit first.',
-    execute: (_args, options) => {
-      if (isCancelled(options)) {
-        return `${ERROR_PREFIX}Tool execution was cancelled.`;
-      }
-      const result = listSlots(readState());
-      writeState(result.state, result.message);
-      return result.message;
-    },
-    inputSchema: openSlotSchema,
+    execute: (_args, options) => runTransition(readState, writeState, options, listSlots),
+    inputSchema: emptyInputSchema,
     name: LIST_SLOTS,
   });
 
@@ -81,9 +81,7 @@ export async function registerDeskTools(
       if (!slotId) {
         return `${ERROR_PREFIX}slotId is required. Call list_slots and pass an open id.`;
       }
-      const result = bookSlot(readState(), slotId);
-      writeState(result.state, result.message);
-      return result.message;
+      return runTransition(readState, writeState, options, (state) => bookSlot(state, slotId));
     },
     inputSchema: bookSlotSchema,
     name: BOOK_SLOT,
@@ -92,15 +90,8 @@ export async function registerDeskTools(
   await modelContext.registerTool({
     annotations: { consequentialHint: true },
     description: 'Confirm the visit after book_slot and file_request. Does not book or file.',
-    execute: (_args, options) => {
-      if (isCancelled(options)) {
-        return `${ERROR_PREFIX}Tool execution was cancelled.`;
-      }
-      const result = confirmVisit(readState());
-      writeState(result.state, result.message);
-      return result.message;
-    },
-    inputSchema: openSlotSchema,
+    execute: (_args, options) => runTransition(readState, writeState, options, confirmVisit),
+    inputSchema: emptyInputSchema,
     name: CONFIRM_VISIT,
   });
 }

@@ -1,4 +1,10 @@
-import { type DeskState, formatAppointmentLine, formatRequestLine, formatVisitLine } from './desk';
+import {
+  type DeskState,
+  formatAppointmentLine,
+  formatRequestLine,
+  formatVisitLine,
+  isSlotBooked,
+} from './desk';
 
 const APPOINTMENTS_LABEL = 'Appointments';
 const REQUESTS_LABEL = 'Requests';
@@ -76,7 +82,8 @@ export function renderDesk(
   clear(appointments);
   clear(requests);
   for (const slot of state.slots) {
-    appendSlot(appointments, formatAppointmentLine(slot), slot.booked);
+    const booked = isSlotBooked(state, slot.id);
+    appendSlot(appointments, formatAppointmentLine(slot, booked), booked);
   }
   if (state.requests.length === 0) {
     const empty = document.createElement('li');
