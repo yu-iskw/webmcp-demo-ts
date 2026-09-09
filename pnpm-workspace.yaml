@@ -18,17 +18,33 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - brace-expansion@5.0.9
   - nanoid@3.3.18
-  # These resolved optional wasm runtimes omit publish time in registry metadata.
-  # Pin the lockfile versions only; do not exempt future releases.
-  - '@emnapi/core@1.9.2'
-  - '@emnapi/core@1.10.0'
-  - '@emnapi/runtime@1.9.2'
-  - '@emnapi/runtime@1.10.0'
+  # Optional wasm runtimes omit publish time on the packument. pnpm 11 then errors
+  # unless the package name is excluded. Overrides pin the lockfile versions.
+  - '@emnapi/core'
+  - '@emnapi/runtime'
+  # Patched Vitest 4.1.11 packuments omit publish time. Overrides pin the versions.
+  - vitest
+  - '@vitest/coverage-v8'
+  - '@vitest/mocker'
+  - browserslist@4.28.7
+  - baseline-browser-mapping@2.11.0
 
 overrides:
+  '@emnapi/core': 1.10.0
+  '@emnapi/runtime': 1.10.0
   # GHSA-r292-9mhp-454m fixed in 7.5.21+
   tar: 7.5.22
   # GHSA-rgw5-rvv9-x895 fixed in 5.0.9+
   brace-expansion: 5.0.9
   # GHSA-2v37-7h3g-55p8 fixed in the 3.x line in 3.3.18+
   nanoid: 3.3.18
+  # GHSA-82fw-gwwq-j7x9 fixed in 4.1.11
+  vitest: 4.1.11
+  '@vitest/coverage-v8': 4.1.11
+  '@vitest/mocker': 4.1.11
+  # GHSA-p498-v437-472g fixed in 0.16.8
+  '@humanfs/node': 0.16.8
+  # GHSA-73wf-gq98-2v4g / GHSA-c83g-rgw3-j3cx
+  browserslist: 4.28.7
+  # GHSA-w5vr-8v7q-w6rv fixed in 2.11.0
+  baseline-browser-mapping: 2.11.0

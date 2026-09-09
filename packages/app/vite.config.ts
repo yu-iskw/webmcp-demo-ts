@@ -1,3 +1,4 @@
+import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -5,4 +6,5 @@ export default defineConfig({
     emptyOutDir: true,
     outDir: 'dist',
   },
+  plugins: [vue()],
 });

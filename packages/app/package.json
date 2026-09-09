@@ -10,7 +10,11 @@
     "dev": "vite",
     "preview": "vite preview --host 127.0.0.1 --port 8080"
   },
+  "dependencies": {
+    "vue": "3.5.41"
+  },
   "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.8",
     "typescript": "^5.9.3",
     "vite": "^8.0.16"
   }
