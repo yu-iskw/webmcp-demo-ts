@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: packages/app/Dockerfile
+    ports:
+      - '127.0.0.1:8080:80'
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/']
+      interval: 2s
+      timeout: 3s
+      retries: 20

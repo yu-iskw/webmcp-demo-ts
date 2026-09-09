@@ -25,6 +25,8 @@
     "knip": "knip",
     "codeql:local": "bash dev/codeql.sh",
     "test": "vitest run",
+    "check:webmcp": "pnpm --filter @typescript-template/webmcp-check start",
+    "demo:webmcp": "pnpm --filter @typescript-template/webmcp-check demo",
     "coverage": "vitest run --coverage",
     "coverage:watch": "vitest --coverage"
   },

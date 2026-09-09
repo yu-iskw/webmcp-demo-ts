@@ -52,6 +52,17 @@ pnpm lint
 pnpm format
 ```
 
+## WebMCP demo
+
+The front-desk page registers native WebMCP tools. Docker Compose serves it on a trustworthy origin. A host Chrome checker discovers and executes those tools.
+
+```bash
+docker compose up -d --build web
+pnpm check:webmcp
+```
+
+The checker launches headed Chrome with `--enable-features=WebMCP,WebMCPTesting` and opens `http://127.0.0.1:8080`. Headless Chrome cannot prove WebMCP. A non-zero exit means discovery, execution, or the visible UI change failed.
+
 ## Project Structure
 
 - `packages/`: Monorepo packages
