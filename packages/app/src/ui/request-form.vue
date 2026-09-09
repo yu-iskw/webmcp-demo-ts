@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
 
-import { bindRequestForm } from './bind-request-form';
+import { bindRequestForm } from '../webmcp/bind-request-form';
 
-import type { DeskState } from './desk';
+import type { DeskState } from '../desk/desk';
 
 const props = defineProps<{
   readState: () => DeskState;

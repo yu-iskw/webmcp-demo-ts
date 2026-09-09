@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
-import { createSeedDesk } from './desk';
+import { createSeedDesk } from '../desk/desk';
 import {
   APPOINTMENTS_LABEL,
   appointmentViews,
@@ -9,11 +9,12 @@ import {
   requestViews,
   visitSteps,
   visitSummary,
-} from './desk-view';
-import RequestForm from './request-form.vue';
-import { registerDeskTools } from './register-tools';
+} from '../desk/desk-view';
+import { registerDeskTools } from '../webmcp/register-tools';
 
-import type { DeskState } from './desk';
+import RequestForm from './request-form.vue';
+
+import type { DeskState } from '../desk/desk';
 
 const READY = 'true';
 const MISSING = 'missing';

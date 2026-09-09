@@ -1,6 +1,6 @@
-import { ERROR_PREFIX, fileRequest } from './desk';
+import { ERROR_PREFIX, fileRequest } from '../desk/desk';
 
-import type { DeskState } from './desk';
+import type { DeskState } from '../desk/desk';
 
 const FILE_REQUEST = 'file_request';
 

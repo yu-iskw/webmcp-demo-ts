@@ -29,21 +29,21 @@ flowchart LR
   page --> tools
 ```
 
-`DocumentModelContext` is `document.modelContext`. The page registers four tools there from `register-tools.ts`. The fifth tool is the form itself.
+`DocumentModelContext` is `document.modelContext`. The page registers four tools there from `webmcp/register-tools.ts`. The fifth tool is the form itself.
 
 Vue holds the visit, the slot list, and the request list. It does not register tools, and it does not bind the request fields with `v-model`. If it did, the next render would overwrite values Chrome had just written into the form.
 
 ## Two ways a tool is born
 
-| Tool            | How the page creates it                      | What Chrome does                                                     |
-| --------------- | -------------------------------------------- | -------------------------------------------------------------------- |
-| `start_visit`   | `registerTool` in `register-tools.ts`        | Calls the JavaScript function                                        |
-| `list_slots`    | `registerTool` in `register-tools.ts`        | Calls the JavaScript function                                        |
-| `book_slot`     | `registerTool` in `register-tools.ts`        | Calls the JavaScript function with `slotId`                          |
-| `confirm_visit` | `registerTool` in `register-tools.ts`        | Calls the JavaScript function                                        |
-| `file_request`  | `toolname` on the form in `request-form.vue` | Focuses the form, fills `name`, `topic`, and `details`, then submits |
+| Tool            | How the page creates it                         | What Chrome does                                                     |
+| --------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
+| `start_visit`   | `registerTool` in `webmcp/register-tools.ts`    | Calls the JavaScript function                                        |
+| `list_slots`    | `registerTool` in `webmcp/register-tools.ts`    | Calls the JavaScript function                                        |
+| `book_slot`     | `registerTool` in `webmcp/register-tools.ts`    | Calls the JavaScript function with `slotId`                          |
+| `confirm_visit` | `registerTool` in `webmcp/register-tools.ts`    | Calls the JavaScript function                                        |
+| `file_request`  | `toolname` on the form in `ui/request-form.vue` | Focuses the form, fills `name`, `topic`, and `details`, then submits |
 
-The form also has `tooldescription` and `toolautosubmit`. `toolautosubmit` tells Chrome to submit after it fills the fields. The submit handler in `bind-request-form.ts` calls `preventDefault`, reads the fields from the form, and calls `respondWith` so the agent receives a sentence instead of a navigation.
+The form also has `tooldescription` and `toolautosubmit`. `toolautosubmit` tells Chrome to submit after it fills the fields. The submit handler in `webmcp/bind-request-form.ts` calls `preventDefault`, reads the fields from the form, and calls `respondWith` so the agent receives a sentence instead of a navigation.
 
 ## A successful visit
 

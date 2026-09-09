@@ -1,7 +1,7 @@
-import { bookSlot, confirmVisit, ERROR_PREFIX, listSlots, startVisit } from './desk';
+import { bookSlot, confirmVisit, ERROR_PREFIX, listSlots, startVisit } from '../desk/desk';
 
-import type { DeskState } from './desk';
 import type { ModelContext, ToolExecuteOptions } from './webmcp';
+import type { DeskState } from '../desk/desk';
 
 const START_VISIT = 'start_visit';
 const LIST_SLOTS = 'list_slots';
