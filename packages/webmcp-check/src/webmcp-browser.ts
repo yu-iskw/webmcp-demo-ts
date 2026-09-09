@@ -1,6 +1,6 @@
 import { chromium, type BrowserContext, type Page } from 'playwright';
 
-export const DEFAULT_BASE_URL = 'http://127.0.0.1:8080';
+const DEFAULT_BASE_URL = 'http://127.0.0.1:8080';
 
 type ToolSummary = {
   name: string;
