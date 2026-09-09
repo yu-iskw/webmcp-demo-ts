@@ -108,22 +108,28 @@ async function fileSupportRequest(page: Page): Promise<string | null> {
       return null;
     },
   );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error('file_request did not finish within 8s'));
+    }, 8000);
+  });
 
   try {
-    await page
-      .getByRole('list', { name: REQUESTS })
-      .getByText(REQUESTER)
-      .waitFor({ timeout: 8000 });
-  } catch (error) {
-    await pending;
-    throw asError(failure ?? error);
+    const value = await Promise.race([pending, timedOut]);
+    if (failure !== undefined) {
+      throw asError(failure);
+    }
+    const requests = await page.getByRole('list', { name: REQUESTS }).innerText();
+    if (!requests.includes(REQUESTER)) {
+      throw new Error('file_request finished without a visible request');
+    }
+    return value;
+  } finally {
+    if (timer) {
+      clearTimeout(timer);
+    }
   }
-
-  const value = await pending;
-  if (failure !== undefined) {
-    throw asError(failure);
-  }
-  return value;
 }
 
 function firstOpenSlotId(output: string): string | undefined {

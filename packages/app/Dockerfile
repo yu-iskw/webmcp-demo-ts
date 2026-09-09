@@ -1,11 +1,13 @@
 FROM node:24.13.0-bookworm-slim AS build
 
 WORKDIR /src
-RUN corepack enable
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable && corepack prepare pnpm@11.0.5 --activate
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/app/package.json packages/app/package.json
 COPY packages/common/package.json packages/common/package.json
+COPY packages/webmcp-check/package.json packages/webmcp-check/package.json
 RUN pnpm install --frozen-lockfile --filter @typescript-template/app...
 
 COPY packages/app packages/app
