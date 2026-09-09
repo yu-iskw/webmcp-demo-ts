@@ -54,7 +54,7 @@ pnpm format
 
 ## WebMCP demo
 
-The front-desk page is a Vue 3 client. It registers native WebMCP tools, not a Vue plugin. Docker Compose serves it on a trustworthy origin. A host Chrome checker discovers and executes those tools.
+The front-desk page is a Vue 3 client. It registers native WebMCP tools, not a Vue plugin. [How the front desk uses WebMCP](packages/app/README.md) explains who talks to whom. Docker Compose serves the page on a trustworthy origin. A host Chrome checker discovers and executes those tools.
 
 ```bash
 docker compose up -d --build web
