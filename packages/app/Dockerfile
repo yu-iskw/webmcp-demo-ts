@@ -11,9 +11,14 @@ RUN pnpm install --frozen-lockfile --filter @typescript-template/app...
 COPY packages/app packages/app
 RUN pnpm --filter @typescript-template/app build
 
-FROM nginx:1.28-alpine
+FROM nginxinc/nginx-unprivileged:1.28-alpine
 
 COPY packages/app/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /src/packages/app/dist /usr/share/nginx/html
+COPY --from=build --chown=nginx:nginx /src/packages/app/dist /usr/share/nginx/html
 
-EXPOSE 80
+USER nginx
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1

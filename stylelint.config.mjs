@@ -1,6 +1,4 @@
 export default {
-  // stylelint-config-prettier targets Stylelint <16 (stylistic rules removed in 16+); Standard v40 aligns with Sl 17.
-  extends: ['stylelint-config-standard'],
   ignoreFiles: [
     '**/dist/**',
     '**/node_modules/**',
@@ -16,5 +14,9 @@ export default {
     ],
     // Intentional source order for cascade; reordering risks regressions (see src/styles/README.md).
     'no-descending-specificity': null,
+    'selector-pseudo-class-no-unknown': [
+      true,
+      { ignorePseudoClasses: ['tool-form-active', 'tool-submit-active'] },
+    ],
   },
 };
