@@ -4,9 +4,9 @@ export const SLOT_1000 = 'slot-1000';
 const SLOT_1100 = 'slot-1100';
 const SLOT_1400 = 'slot-1400';
 
-export const REQUEST_TOPICS = ['access', 'billing', 'other'] as const;
+const REQUEST_TOPICS = ['access', 'billing', 'other'] as const;
 
-export type RequestTopic = (typeof REQUEST_TOPICS)[number];
+type RequestTopic = (typeof REQUEST_TOPICS)[number];
 
 export type Slot = {
   id: string;
@@ -20,7 +20,7 @@ export type SupportRequest = {
   topic: RequestTopic;
 };
 
-export type Visit = {
+type Visit = {
   confirmed: boolean;
   id: string;
   listed: boolean;
