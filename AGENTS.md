@@ -52,7 +52,7 @@ Split so agents and CI get consistent, low-conflict feedback:
 - **Knip** (`knip.json`): unused deps, exports, workspace entrypoints. Run `pnpm knip` before large refactors or when adding packages.
 - **Trunk:** ESLint, Prettier, **Trivy**, **OSV-scanner**, etc. Use `pnpm lint:security` for security-scoped checks.
 
-**Suggested pre-commit gate:** `pnpm lint:eslint && pnpm knip && pnpm lint && pnpm test` (or `pnpm lint` alone for Trunk-only). CI enforces `pnpm lint:security` via `sbom.yml` / `publish.yml`; run it locally before dependency bumps. Prefer **`pnpm format`** / `trunk fmt`; use **`pnpm format:eslint`** when you want ESLint `--fix` only.
+**Suggested pre-commit gate:** `pnpm lint:eslint && pnpm knip && pnpm lint && pnpm test` (or `pnpm lint` alone for Trunk-only). `publish.yml` still runs `pnpm lint:security` before npm publish; run it locally before dependency bumps. Prefer **`pnpm format`** / `trunk fmt`; use **`pnpm format:eslint`** when you want ESLint `--fix` only.
 
 ## Code style
 
@@ -99,7 +99,7 @@ When you want durable fixes (not one-off chat advice):
 
 - **Packages:** `packages/*` (and `src/` inside a package when used)
 - **Root:** shared scripts and config
-- **CI:** `.github/workflows/` — `sbom.yml` runs `pnpm lint:security` then generates/scans an SPDX SBOM on PRs/main; `publish.yml` re-runs `pnpm lint:security` before npm publish
+- **CI:** `.github/workflows/` — build, test, Trunk, and CodeQL on PRs/`main`; `publish.yml` runs `pnpm lint:security` before npm publish
 - **Agent/tooling config:** `.cursor/` (Cursor rules), `.claude/` (Claude Code compatibility/hooks), `.codex/` (Codex), `.gemini/` (Gemini CLI). Copilot can also read `.github/copilot-instructions.md` alongside `AGENTS.md`.
 - **ADRs:** significant decisions in `docs/adr` when you use ADR tooling
 
